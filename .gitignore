@@ -4,13 +4,20 @@ obj/
 .vs/
 .vscode/
 .idea/
+*.user
+*.suo
 
 node_modules/
 
 .env
 .env.*
 !.env.example
+
 .DS_Store
 
-*.user
-*.suo
+kreddit.db
+kreddit.db-shm
+kreddit.db-wal
+kreddit.db-journal
+
+*.Backup.tmp
