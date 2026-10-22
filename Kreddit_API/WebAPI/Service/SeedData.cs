@@ -46,7 +46,7 @@ namespace WebAPI.Service
             db.Posts.Add(post);
             db.Posts.Add(new Post
             {
-                Title = "Et link til Wikipedia",
+                Title = "Et link til google",
                 Url = "https://google.com",
                 User = user
             });
