@@ -31,19 +31,19 @@ public class ApiService
         return await http.GetFromJsonAsync<Post>(url);
     }
 
-    public async Task<Comment> CreateComment(string content, int postId, int userId)
+    public async Task<Comment> CreateComment(string content, int postId, string username)
     {
         string url = $"{baseAPI}posts/{postId}/comments";
-
+     
         // Post JSON to API, save the HttpResponseMessage
-        HttpResponseMessage msg = await http.PostAsJsonAsync(url, new { content, userId });
+        HttpResponseMessage msg = await http.PostAsJsonAsync(url, new { content, username });
 
         // Get the JSON string from the response
-        string json = msg.Content.ReadAsStringAsync().Result;
+        msg.EnsureSuccessStatusCode();
+        string json = await msg.Content.ReadAsStringAsync();
 
         // Deserialize the JSON string to a Comment object
-        Comment? newComment = JsonSerializer.Deserialize<Comment>(json, new JsonSerializerOptions
-        {
+        Comment? newComment = JsonSerializer.Deserialize<Comment>(json, new JsonSerializerOptions {
             PropertyNameCaseInsensitive = true // Ignore case when matching JSON properties to C# properties 
         });
 
@@ -59,11 +59,11 @@ public class ApiService
         HttpResponseMessage msg = await http.PutAsJsonAsync(url, "");
 
         // Get the JSON string from the response
-        string json = msg.Content.ReadAsStringAsync().Result;
+        msg.EnsureSuccessStatusCode();
+        string json = await msg.Content.ReadAsStringAsync();
 
         // Deserialize the JSON string to a Post object
-        Post? updatedPost = JsonSerializer.Deserialize<Post>(json, new JsonSerializerOptions
-        {
+        Post? updatedPost = JsonSerializer.Deserialize<Post>(json, new JsonSerializerOptions {
             PropertyNameCaseInsensitive = true // Ignore case when matching JSON properties to C# properties
         });
 
@@ -71,13 +71,41 @@ public class ApiService
         return updatedPost;
     }
 
-    public async Task<Post> CreatePost(string title, string content, int userId)
+    public async Task<Post> CreatePost(string title, string content, string username)
     {
         string url = $"{baseAPI}posts";
 
-        var response = await http.PostAsJsonAsync(
-            url, new { title, content, userId });
+        string? postUrl = null;
+        if (Uri.TryCreate(content.Trim(), UriKind.Absolute, out var link)
+            && (link.Scheme == "http" || link.Scheme == "https"))
+        {
+            postUrl = content.Trim();
+            content = "";
+        }
+
+        using var response = await http.PostAsJsonAsync(
+            url, new { title, content, url = postUrl, username });
+        response.EnsureSuccessStatusCode();
 
         return await response.Content.ReadFromJsonAsync<Post>();
+    }
+    public async Task DownvotePost(int id)
+    {
+        using var response = await http.PutAsync($"{baseAPI}posts/{id}/downvote", null);
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task UpvoteComment(int postId, int commentId)
+    {
+        using var response = await http.PutAsync(
+            $"{baseAPI}posts/{postId}/comments/{commentId}/upvote", null);
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task DownvoteComment(int postId, int commentId)
+    {
+        using var response = await http.PutAsync(
+            $"{baseAPI}posts/{postId}/comments/{commentId}/downvote", null);
+        response.EnsureSuccessStatusCode();
     }
 }

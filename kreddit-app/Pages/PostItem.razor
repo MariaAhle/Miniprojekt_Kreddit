@@ -9,6 +9,7 @@ See how the links are made in 'PostList.razor'.
 @inject ApiService apiService
 
 <PageTitle>Kreddit</PageTitle>
+<a href="/">Back</a>
 
 <style>
 div.contents {
@@ -29,7 +30,17 @@ else
     <div class="contents">
         <h4>@Post.Title</h4>
         <p><strong>User: @Post.User.Username, Votes: @(Post.Upvotes - Post.Downvotes)</strong></p>
-        <p>@Post.Content</p>
+        <p>@Post.CreatedAt.ToLocalTime().ToString("dd-MM-yyyy HH:mm")</p>
+        @if (string.IsNullOrWhiteSpace(Post.Url))
+        {
+            <p>@Post.Content</p>
+        }
+        else
+        {
+            <p><a href="@Post.Url">@Post.Url</a></p>
+        }
+        <button @onclick="() => VotePost(true)">Upvote</button>
+        <button @onclick="() => VotePost(false)">Downvote</button>
     </div>
 
     <div class="contents">
@@ -40,11 +51,11 @@ else
             <th>Comment</th>
             <th colspan="3">Votes</th>
         </tr>
-        @foreach (var comment in Post.Comments)
+        @foreach (var comment in Post.Comments.OrderBy(c => c.Id))
         {
             <tr>
                 <td>@comment.User.Username</td>
-                <td>@comment.Content</td>
+                <td>@comment.Content<br/>@comment.CreatedAt.ToLocalTime().ToString("dd-MM-yyyy HH:mm")</td>
                 <td>@(comment.Upvotes - comment.Downvotes)</td>
                 <td><button @onclick="() => Upvote(comment.Id)">Upvote</button></td>
                 <td><button @onclick="() => Downvote(comment.Id)">Downvote</button></td>
@@ -55,7 +66,7 @@ else
 
     <!-- This demonstrates how to pass in PostId to the component 'CreateComment'. See how 
          it is used in the file CreateComment.razor -->
-    <CreateComment PostId=@PostId></CreateComment>
+    <CreateComment PostId=@PostId OnCreated="OnInitializedAsync"></CreateComment>
 }
 
 @code {
@@ -68,13 +79,21 @@ else
     {
         Post = await apiService.GetPost(PostId);
     }
-    private async void Upvote(int id)
+    private async Task Upvote(int id)
     {
-        Console.WriteLine("Not implemented 😪");
+        await apiService.UpvoteComment(PostId, id);
+        Post = await apiService.GetPost(PostId);
     }
 
-    private async void Downvote(int id)
+    private async Task Downvote(int id)
     {
-        Console.WriteLine("Not implemented 😪");
+        await apiService.DownvoteComment(PostId, id);
+        Post = await apiService.GetPost(PostId);
+    }
+    private async Task VotePost(bool upvote)
+    {
+        if (upvote) await apiService.UpvotePost(PostId);
+        else await apiService.DownvotePost(PostId);
+        Post = await apiService.GetPost(PostId);
     }
 }

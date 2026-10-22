@@ -1,9 +1,10 @@
-@using kreddit_app.Data;
+﻿@using kreddit_app.Data;
 @inject ApiService apiService
 
 <div>
     <br/>
     <h3>Write a comment</h3>
+    <input placeholder="User" @bind-value="username"/>
     <input placeholder="Content" type="input" id="content" @bind-value="content"/>
     <button id="createPostButton" type="button" @onclick="CreateNewComment">Post comment</button>
 </div>
@@ -13,15 +14,19 @@
     // PostId is passed in from the parent component. See how in PostItem.razor.
     [Parameter]
     public int PostId { get; set; }
+    [Parameter] public EventCallback OnCreated { get; set; }
+    private string? username;
     private string? content;
-    private async void CreateNewComment()
+    private async Task CreateNewComment()
     {
-        if (content == null)
+        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(content))
         {
             return;
         }
         // TODO: Provide list of users from dropdown, or maybe just convert
         // from username to UserId
-        await apiService.CreateComment(content, PostId, 2); // UserId: 2
+        await apiService.CreateComment(content, PostId, username);
+        content = "";
+        await OnCreated.InvokeAsync();
     }
 }

@@ -1,4 +1,4 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 
 @using kreddit_app.Data;
 @using shared.Model;
@@ -47,13 +47,15 @@ else
         posts = await apiService.GetPosts();
     }
 
-    private async void Upvote(int id)
+    private async Task Upvote(int id)
     {
-        var updatedPost = await apiService.UpvotePost(id);
+        await apiService.UpvotePost(id);
+        posts = await apiService.GetPosts();
     }
 
-    private async void Downvote(int id)
+    private async Task Downvote(int id)
     {
-        Console.WriteLine("Not implemented 😪");
+        await apiService.DownvotePost(id);
+        posts = await apiService.GetPosts();
     }
 }

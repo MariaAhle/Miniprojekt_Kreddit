@@ -46,7 +46,8 @@ app.MapGet("/posts", async (KredditDbContext db) =>
 {
     return await db.Posts
         .Include(p => p.User)
-        .Include(p => p.Comments)
+        .Include(p => p.Comments).ThenInclude(c => c.User)
+        .OrderByDescending(p => p.CreatedAt)
         .ToListAsync();
 });
 
@@ -55,7 +56,7 @@ app.MapGet("/posts/{id}", async (int id, KredditDbContext db) =>
 {
     var post = await db.Posts
         .Include(p => p.User)
-        .Include(p => p.Comments)
+        .Include(p => p.Comments).ThenInclude(c => c.User)
         .FirstOrDefaultAsync(p => p.Id == id);
     if (post == null)
     {
@@ -65,8 +66,11 @@ app.MapGet("/posts/{id}", async (int id, KredditDbContext db) =>
 });
 
 // Opret ny post
-app.MapPost("/posts", async (Post post, KredditDbContext db) =>
+app.MapPost("/posts", async (CreatePostRequest request, KredditDbContext db) =>
 {
+    var user = new User(request.Username);
+    var post = new Post(user, request.Title, request.Content);
+    post.Url = request.Url;
     db.Posts.Add(post);
     await db.SaveChangesAsync();
     return Results.Created($"/posts/{post.Id}", post);
@@ -82,14 +86,13 @@ app.MapPost("/posts/{id}/comments", async (int id, CreateCommentRequest request,
     {
         return Results.NotFound();
     }
-    var user = await db.Users.FindAsync(request.UserId);
-    if (user == null)
-    {
-        return Results.NotFound("User not found");
-    }
+    if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Content))
+        return Results.BadRequest("Navn og kommentar skal udfyldes.");
+
+    var user = new User(request.Username.Trim());
     var comment = new Comment
     {
-        Content = request.Content,
+        Content = request.Content.Trim(),
         User = user
     };
     post.Comments.Add(comment);
@@ -169,5 +172,12 @@ public class CreateCommentRequest
 {
 
     public string Content { get; set; } = "";
-    public int UserId { get; set; }
+    public string Username { get; set; } = "";
+}
+public class CreatePostRequest
+{
+    public string Title { get; set; } = "";
+    public string Content { get; set; } = "";
+    public string? Url { get; set; }
+    public string Username { get; set; } = "";
 }

@@ -1,3 +1,4 @@
+@page "/create-post"
 @using kreddit_app.Data;
 @using shared.Model;
 @inject ApiService apiService
@@ -6,19 +7,22 @@
 <div>
     <br/>
     <h3>Create a new Post</h3>
+    <a href="/">Back</a>
+    <input placeholder="User" @bind-value="username"/>
     <input placeholder="Title" type="input" id="postTitle" @bind-value="postTitle"/>
     <input placeholder="Content" type="input" id="postContent" @bind-value="postContent"/>
     <button id="createPostButton" type="button" @onclick="CreateNewPost">Create Post</button>
 </div>
 
 @code {
+    private string? username;
     private string? postTitle;
     private string? postContent;
     
-    private async void CreateNewPost()
+    private async Task CreateNewPost()
     {
         Console.WriteLine("Creating new post");
-        if (postTitle == null || postContent == null)
+        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(postTitle) || string.IsNullOrWhiteSpace(postContent))
         {
             return;
         }
@@ -26,7 +30,7 @@
         // TODO: Provide list of users from dropdown, or maybe just convert
         // from username to UserId
 
-        await apiService.CreatePost(postTitle, postContent, 2); // UserID: 2
+        await apiService.CreatePost(postTitle, postContent, username);
         StateHasChanged();
         NavigationManager.NavigateTo("/", true);
     }
