@@ -71,13 +71,58 @@ public class ApiService
         return updatedPost;
     }
 
-    public async Task<Post> CreatePost(string title, string content, int userId)
+    public async Task<Post> CreatePost(
+    string title, string? content, int userId, string? url = null)
     {
-        string url = $"{baseAPI}posts";
+        string endpoint = $"{baseAPI}posts";
 
         var response = await http.PostAsJsonAsync(
-            url, new { title, content, userId });
+            endpoint, new { title, content, url, userId });
 
         return await response.Content.ReadFromJsonAsync<Post>();
+    }
+    public async Task<Post> DownvotePost(int id)
+    {
+        string url = $"{baseAPI}posts/{id}/downvote";
+
+        HttpResponseMessage msg = await http.PutAsJsonAsync(url, "");
+        string json = msg.Content.ReadAsStringAsync().Result;
+
+        Post? updatedPost = JsonSerializer.Deserialize<Post>(json, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        });
+
+        return updatedPost;
+    }
+
+    public async Task<Comment> UpvoteComment(int postId, int commentId)
+    {
+        string url = $"{baseAPI}posts/{postId}/comments/{commentId}/upvote";
+
+        HttpResponseMessage msg = await http.PutAsJsonAsync(url, "");
+        string json = msg.Content.ReadAsStringAsync().Result;
+
+        Comment? updatedComment = JsonSerializer.Deserialize<Comment>(json, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        });
+
+        return updatedComment;
+    }
+
+    public async Task<Comment> DownvoteComment(int postId, int commentId)
+    {
+        string url = $"{baseAPI}posts/{postId}/comments/{commentId}/downvote";
+
+        HttpResponseMessage msg = await http.PutAsJsonAsync(url, "");
+        string json = msg.Content.ReadAsStringAsync().Result;
+
+        Comment? updatedComment = JsonSerializer.Deserialize<Comment>(json, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        });
+
+        return updatedComment;
     }
 }
