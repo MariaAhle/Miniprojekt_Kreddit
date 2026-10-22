@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using WebAPI.Data;
 using shared.Model;
+using WebAPI.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +23,15 @@ builder.Services.AddDbContext<KredditDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("Kreddit")));
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider
+        .GetRequiredService<KredditDbContext>();
+
+    var seedData = new SeedData(db);
+    seedData.SeedDatas();
+}
 
 if (app.Environment.IsDevelopment())
 {

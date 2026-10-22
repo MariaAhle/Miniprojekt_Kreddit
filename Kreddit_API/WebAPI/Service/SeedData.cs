@@ -1,4 +1,4 @@
-﻿using shared.Model;
+using shared.Model;
 using WebAPI.Data;
 
 namespace WebAPI.Service
@@ -6,13 +6,21 @@ namespace WebAPI.Service
     public class SeedData
     {
         public KredditDbContext db { get; }
+
         public SeedData(KredditDbContext db)
         {
             this.db = db;
         }
+
         public void SeedDatas()
         {
-            User user = db.Users.FirstOrDefault()!;
+            // Opret kun testdata, hvis der ikke er posts endnu.
+            if (db.Posts.Any())
+            {
+                return;
+            }
+
+            User? user = db.Users.FirstOrDefault();
             if (user == null)
             {
                 user = new User { Username = "Jonathan" };
@@ -21,11 +29,29 @@ namespace WebAPI.Service
                 db.Users.Add(new User { Username = "Emma" });
             }
 
-            Post post = db.Posts.FirstOrDefault()!;
-            if (post == null)
+            var post = new Post
             {
-                db.Posts.Add(new Post { Id = 1, Title = "hejhej", Content = "Hallo, hvordan har i det?" });
-            }
+                Title = "hejhej",
+                Content = "Hallo, hvordan har I det?",
+                User = user,
+                Upvotes = 2
+            };
+
+            post.Comments.Add(new Comment
+            {
+                Content = "Jeg har det godt!",
+                User = user
+            });
+
+            db.Posts.Add(post);
+            db.Posts.Add(new Post
+            {
+                Title = "Et link til Wikipedia",
+                Url = "https://google.com",
+                User = user
+            });
+
+            db.SaveChanges();
         }
     }
 }
