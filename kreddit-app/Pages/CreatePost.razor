@@ -1,6 +1,7 @@
 @using kreddit_app.Data;
 @using shared.Model;
 @inject ApiService apiService
+@inject NavigationManager NavigationManager;
 
 <div>
     <br/>
@@ -13,9 +14,7 @@
 @code {
     private string? postTitle;
     private string? postContent;
-
-    @inject NavigationManager NavigationManager;
-
+    
     private async void CreateNewPost()
     {
         Console.WriteLine("Creating new post");
