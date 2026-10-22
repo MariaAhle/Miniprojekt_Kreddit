@@ -1,4 +1,4 @@
-﻿@using kreddit_app.Data;
+@using kreddit_app.Data;
 @inject ApiService apiService
 
 <div>
@@ -23,8 +23,6 @@
         {
             return;
         }
-        // TODO: Provide list of users from dropdown, or maybe just convert
-        // from username to UserId
         await apiService.CreateComment(content, PostId, username);
         content = "";
         await OnCreated.InvokeAsync();

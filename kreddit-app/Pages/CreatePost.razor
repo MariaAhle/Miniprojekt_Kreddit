@@ -21,17 +21,12 @@
     
     private async Task CreateNewPost()
     {
-        Console.WriteLine("Creating new post");
         if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(postTitle) || string.IsNullOrWhiteSpace(postContent))
         {
             return;
         }
-        Console.WriteLine(postTitle + " " + postContent);
-        // TODO: Provide list of users from dropdown, or maybe just convert
-        // from username to UserId
 
         await apiService.CreatePost(postTitle, postContent, username);
-        StateHasChanged();
         NavigationManager.NavigateTo("/", true);
     }
 }
