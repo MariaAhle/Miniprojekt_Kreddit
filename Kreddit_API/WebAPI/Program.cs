@@ -59,10 +59,7 @@ app.MapPost("/posts", async (Post post, KredditDbContext db) =>
 
 
 // Opret kommentar
-app.MapPost("/posts/{postId}/comments", async (
-    int postId,
-    CreateCommentRequest request,
-    KredditDbContext db) =>
+app.MapPost("/posts/{postId}/comments", async (int postId, CreateCommentRequest request, KredditDbContext db) =>
 {
     var post = await db.Posts
         .Include(p => p.Comments)
@@ -90,16 +87,12 @@ app.MapPost("/posts/{postId}/comments", async (
 
     await db.SaveChangesAsync();
 
-    return Results.Created(
-        $"/posts/{postId}/comments",
-        comment);
+    return Results.Created($"/posts/{postId}/comments", comment);
 });
 
 
 // Upvote post
-app.MapPut("/posts/{id}/upvote", async (
-    int id,
-    KredditDbContext db) =>
+app.MapPut("/posts/{id}/upvote", async (int id, KredditDbContext db) =>
 {
     var post = await db.Posts.FindAsync(id);
 
@@ -117,9 +110,7 @@ app.MapPut("/posts/{id}/upvote", async (
 
 
 // Downvote post
-app.MapPut("/posts/{id}/downvote", async (
-    int id,
-    KredditDbContext db) =>
+app.MapPut("/posts/{id}/downvote", async (int id, KredditDbContext db) =>
 {
     var post = await db.Posts.FindAsync(id);
 
@@ -137,10 +128,7 @@ app.MapPut("/posts/{id}/downvote", async (
 
 
 // Upvote kommentar
-app.MapPut("/posts/{postId}/comments/{commentId}/upvote", async (
-    int postId,
-    int commentId,
-    KredditDbContext db) =>
+app.MapPut("/posts/{postId}/comments/{commentId}/upvote", async (int postId, int commentId, KredditDbContext db) =>
 {
     var post = await db.Posts
         .Include(p => p.Comments)
@@ -168,10 +156,7 @@ app.MapPut("/posts/{postId}/comments/{commentId}/upvote", async (
 
 
 // Downvote kommentar
-app.MapPut("/posts/{postId}/comments/{commentId}/downvote", async (
-    int postId,
-    int commentId,
-    KredditDbContext db) =>
+app.MapPut("/posts/{postId}/comments/{commentId}/downvote", async (int postId, int commentId, KredditDbContext db) =>
 {
     var post = await db.Posts
         .Include(p => p.Comments)
