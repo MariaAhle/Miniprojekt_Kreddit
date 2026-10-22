@@ -59,11 +59,11 @@ app.MapPost("/posts", async (Post post, KredditDbContext db) =>
 
 
 // Opret kommentar
-app.MapPost("/posts/{postId}/comments", async (int postId, CreateCommentRequest request, KredditDbContext db) =>
+app.MapPost("/posts/{id}/comments", async (int id, CreateCommentRequest request, KredditDbContext db) =>
 {
     var post = await db.Posts
         .Include(p => p.Comments)
-        .FirstOrDefaultAsync(p => p.Id == postId);
+        .FirstOrDefaultAsync(p => p.Id == id);
 
     if (post == null)
     {
@@ -87,7 +87,7 @@ app.MapPost("/posts/{postId}/comments", async (int postId, CreateCommentRequest 
 
     await db.SaveChangesAsync();
 
-    return Results.Created($"/posts/{postId}/comments", comment);
+    return Results.Created($"/posts/{id}/comments", comment);
 });
 
 
